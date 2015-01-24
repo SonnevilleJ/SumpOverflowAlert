@@ -1,3 +1,5 @@
+import smtplib
+
 __author__ = 'John Sonneville'
 
 
@@ -6,4 +8,6 @@ class GmailNotifier(object):
         super().__init__()
 
     def send_notification(self):
-        pass
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+
+        server.close()
