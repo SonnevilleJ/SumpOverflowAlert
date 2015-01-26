@@ -1,0 +1,2 @@
+class RangeSensor(object):
+    pass

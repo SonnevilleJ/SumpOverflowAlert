@@ -1,5 +1,10 @@
 from unittest import TestCase
 
+from SumpOverflowAlert import config
+
+from SumpOverflowAlert.App import App
+
+
 __author__ = 'John Sonneville'
 
 
@@ -7,8 +12,12 @@ class TestApp(TestCase):
     def __init__(self, method_name='runTest'):
         super().__init__(method_name)
 
-    def setUpModule(self):
-        pass
+    def setUp(self):
+        self.app = App()
 
-    def tearDownModule(self):
-        pass
+    def test_creates_notifier(self):
+        self.assertEqual(self.app.notifier.username, config.gmail['username'])
+        self.assertEqual(self.app.notifier.password, config.gmail['password'])
+
+    def test_creates_range_sensor(self):
+        self.assertIsNotNone(self.app.rangeSensor)

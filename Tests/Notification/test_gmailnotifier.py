@@ -1,14 +1,14 @@
 from unittest import mock
 from unittest import TestCase
 
-from SumpOverflowAlert.Notification import GmailNotifier
+from SumpOverflowAlert.Notification.GmailNotifier import GmailNotifier
 
 
 class TestGmailNotifier(TestCase):
     def setUp(self):
         self.username = "username"
         self.password = "password"
-        self.notifier = GmailNotifier.GmailNotifier(self.username, self.password)
+        self.notifier = GmailNotifier(self.username, self.password)
 
     def __verify_sent_email(self, mock_smtplib, subject):
         mock_smtplib.SMTP.assert_called_with('smtp.gmail.com', 587)
