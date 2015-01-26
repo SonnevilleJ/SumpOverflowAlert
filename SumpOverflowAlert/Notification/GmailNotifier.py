@@ -15,10 +15,16 @@ class GmailNotifier(object):
         server.sendmail(self.username, [self.username], message)
         server.close()
 
+    def __format_email(self, subject):
+        return """From: %s\nTo: %s\nSubject: %s\n\n%s""" % \
+               (self.username, ", ".join([self.username]), subject, "")
+
     def send_notification(self):
         subject = "Sump Overflow Notification"
-        body = ""
-        message = """From: %s\nTo: %s\nSubject: %s\n\n%s""" % \
-                  (self.username, ", ".join([self.username]), subject, body)
+        message = self.__format_email(subject)
+        self.__send_email(message)
 
+    def send_all_clear(self):
+        subject = "Sump Level Normal"
+        message = self.__format_email(subject)
         self.__send_email(message)
