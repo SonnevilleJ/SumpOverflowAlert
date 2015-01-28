@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../../')
+
 from unittest import mock
 from unittest import TestCase
 
