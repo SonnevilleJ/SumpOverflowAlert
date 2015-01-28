@@ -1,6 +1,6 @@
 from unittest import TestCase
 import sys
-sys.path.append('../')
+sys.path.append('./')
 
 from SumpOverflowAlert import config
 from SumpOverflowAlert.App import App
