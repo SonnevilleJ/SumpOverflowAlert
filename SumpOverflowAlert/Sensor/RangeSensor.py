@@ -1,2 +1,3 @@
 class RangeSensor(object):
-    pass
+    def get_distance(self):
+        pass
