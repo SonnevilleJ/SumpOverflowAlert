@@ -18,7 +18,7 @@ class TestApp(TestCase):
 
     def setUp(self):
         self.current_distance = config.trigger_distance
-        self.max_loops = 300
+        self.max_loops = 400
         config.alert_after = 1
         self.loop_count = 0
         self.sensor_mock = Mock()
@@ -30,12 +30,15 @@ class TestApp(TestCase):
         return self.loop_count < self.max_loops
 
     def sendNotificationStub(self):
+        print("called sendNotification on iteration: " + str(self.sleeper_mock.sleep.call_count))
         self.sleeper_mock.sleep.assert_called_with(0.01)
-        self.assertEqual(self.sleeper_mock.sleep.call_count, 100)
+        count = (self.sleeper_mock.sleep.call_count + 100) % 200
+        self.assertEqual(0, count)
 
     def sendAllClearStub(self):
+        print("called sendAllClear on iteration: " + str(self.sleeper_mock.sleep.call_count))
         self.sleeper_mock.sleep.assert_called_with(0.01)
-        self.assertEqual(self.sleeper_mock.sleep.call_count, 101)
+        self.assertEqual(0, self.sleeper_mock.sleep.call_count % 200)
 
     def test_default_constructor_values(self):
         self.app = App()
@@ -59,30 +62,20 @@ class TestApp(TestCase):
 
         self.sleeper_mock.sleep.assert_called_with(0.1)
 
-    def test_should_sleep_10_when_less_than_trigger_distance(self):
+    def test_should_alert_after_previous_all_clear(self):
         def get_distance_stub():
             self.app.shouldContinue = self.shouldContinue()
             self.loop_count += 1
-            return self.current_distance
-        self.sensor_mock.get_distance.side_effect = get_distance_stub
-        self.current_distance = 9
-        self.notifier_mock.send_notification.side_effect = self.sendNotificationStub
-
-        self.app.run()
-
-        self.notifier_mock.send_notification.assert_called_with()
-
-    def test_should_sleep_100_after_returning_past_trigger_distance(self):
-        def get_distance_stub():
-            if self.loop_count == 100:
+            if self.loop_count % 200 == 0:
                 self.current_distance = config.trigger_distance
-            self.app.shouldContinue = self.shouldContinue()
-            self.loop_count += 1
+            if self.loop_count % 200 == 1:
+                self.current_distance = 0
             return self.current_distance
         self.sensor_mock.get_distance.side_effect = get_distance_stub
+        self.notifier_mock.send_notification.side_effect = self.sendNotificationStub
         self.notifier_mock.send_all_clear.side_effect = self.sendAllClearStub
-        self.current_distance = 9
 
         self.app.run()
 
-        self.notifier_mock.send_all_clear.assert_called_with()
+        self.assertGreaterEqual(self.notifier_mock.send_notification.call_count, 2)
+        self.assertGreaterEqual(self.notifier_mock.send_all_clear.call_count, 2)

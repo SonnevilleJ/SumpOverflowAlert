@@ -35,5 +35,5 @@ class App(object):
                 if notification_sent:
                     self.notifier.send_all_clear()
                     notification_sent = False
-
+                    loop_counter = 0
 
