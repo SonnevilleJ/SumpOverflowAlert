@@ -19,17 +19,21 @@ class App(object):
 
     def run(self):
         sleep_timer = 0.1
+        loop_counter = 0
+        notification_sent = False
         while self.shouldContinue:
             self.sleeper.sleep(sleep_timer)
             distance = self.rangeSensor.get_distance()
+            loop_counter += 1
             if distance < config.trigger_distance:
                 sleep_timer = 0.01
+                if loop_counter * sleep_timer == config.alert_after:
+                    self.notifier.send_notification()
+                    notification_sent = True
             else:
                 sleep_timer = 0.1
+                if notification_sent:
+                    self.notifier.send_all_clear()
+                    notification_sent = False
 
-                # self.notifier.send_notification()
-                # else
-                #     reduce duration
-                # OR send alert
-                # sleep(self.duration)
 
