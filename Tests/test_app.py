@@ -1,10 +1,6 @@
-import time
 from unittest import TestCase
 import sys
 from unittest.mock import Mock
-
-from Sensor import RangeSensor
-from sleeper import Sleeper
 
 
 sys.path.append('./')
