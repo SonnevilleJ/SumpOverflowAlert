@@ -1,9 +1,10 @@
-from unittest import TestCase
 import sys
-from unittest.mock import Mock
-
 
 sys.path.append('./')
+
+from unittest import TestCase
+from unittest.mock import Mock
+import mock
 
 from SumpOverflowAlert import config
 from SumpOverflowAlert.App import App
@@ -23,22 +24,21 @@ class TestApp(TestCase):
         self.loop_count = 0
         self.sensor_mock = Mock()
         self.notifier_mock = Mock()
-        self.sleeper_mock = Mock()
-        self.app = App(self.sensor_mock, self.notifier_mock, self.sleeper_mock)
+        self.app = App(self.sensor_mock, self.notifier_mock)
 
     def shouldContinue(self):
         return self.loop_count < self.max_loops
 
     def sendNotificationStub(self):
-        print("called sendNotification on iteration: " + str(self.sleeper_mock.sleep.call_count))
-        self.sleeper_mock.sleep.assert_called_with(0.01)
-        count = (self.sleeper_mock.sleep.call_count + 100) % 200
+        print("called sendNotification on iteration: " + str(self.mock_time.sleep.call_count))
+        self.mock_time.sleep.assert_called_with(0.01)
+        count = (self.mock_time.sleep.call_count + 100) % 200
         self.assertEqual(0, count)
 
     def sendAllClearStub(self):
-        print("called sendAllClear on iteration: " + str(self.sleeper_mock.sleep.call_count))
-        self.sleeper_mock.sleep.assert_called_with(0.01)
-        self.assertEqual(0, self.sleeper_mock.sleep.call_count % 200)
+        print("called sendAllClear on iteration: " + str(self.mock_time.sleep.call_count))
+        self.mock_time.sleep.assert_called_with(0.01)
+        self.assertEqual(0, self.mock_time.sleep.call_count % 200)
 
     def test_default_constructor_values(self):
         self.app = App()
@@ -51,18 +51,22 @@ class TestApp(TestCase):
     def test_creates_range_sensor(self):
         self.assertIsNotNone(self.app.rangeSensor)
 
-    def test_should_sleep_100_between_measurements(self):
+    @mock.patch("SumpOverflowAlert.App.time")
+    def test_should_sleep_100_between_measurements(self, mock_time):
         def get_distance_stub():
             self.app.shouldContinue = self.shouldContinue()
             self.loop_count += 1
             return self.current_distance
+
+        self.mock_time = mock_time
         self.sensor_mock.get_distance.side_effect = get_distance_stub
 
         self.app.run()
 
-        self.sleeper_mock.sleep.assert_called_with(0.1)
+        mock_time.sleep.assert_called_with(0.1)
 
-    def test_should_alert_after_previous_all_clear(self):
+    @mock.patch("SumpOverflowAlert.App.time")
+    def test_should_alert_after_previous_all_clear(self, mock_time):
         def get_distance_stub():
             self.app.shouldContinue = self.shouldContinue()
             self.loop_count += 1
@@ -71,6 +75,8 @@ class TestApp(TestCase):
             if self.loop_count % 200 == 1:
                 self.current_distance = 0
             return self.current_distance
+
+        self.mock_time = mock_time
         self.sensor_mock.get_distance.side_effect = get_distance_stub
         self.notifier_mock.send_notification.side_effect = self.sendNotificationStub
         self.notifier_mock.send_all_clear.side_effect = self.sendAllClearStub
