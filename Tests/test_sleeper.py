@@ -2,7 +2,7 @@ import sys
 from unittest import mock
 from unittest import TestCase
 
-from sleeper import Sleeper
+from SumpOverflowAlert.sleeper import Sleeper
 
 
 sys.path.append('./')
