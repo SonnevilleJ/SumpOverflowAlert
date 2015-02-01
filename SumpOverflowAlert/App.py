@@ -1,7 +1,7 @@
 from SumpOverflowAlert import config
 from SumpOverflowAlert.Notification.GmailNotifier import GmailNotifier
 from SumpOverflowAlert.Sensor.RangeSensor import RangeSensor
-from SumpOverflowAlert.Sleeper.sleeper import Sleeper
+from sleeper import Sleeper
 
 __author__ = 'John Sonneville'
 
