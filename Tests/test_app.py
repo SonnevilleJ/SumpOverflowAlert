@@ -3,8 +3,7 @@ import sys
 sys.path.append('./')
 
 from unittest import TestCase
-from unittest.mock import Mock
-import mock
+from unittest.mock import Mock, patch
 
 from SumpOverflowAlert import config
 from SumpOverflowAlert.App import App
@@ -51,7 +50,7 @@ class TestApp(TestCase):
     def test_creates_range_sensor(self):
         self.assertIsNotNone(self.app.rangeSensor)
 
-    @mock.patch("SumpOverflowAlert.App.time")
+    @patch("SumpOverflowAlert.App.time")
     def test_should_sleep_100_between_measurements(self, mock_time):
         def get_distance_stub():
             self.app.shouldContinue = self.shouldContinue()
@@ -65,7 +64,7 @@ class TestApp(TestCase):
 
         mock_time.sleep.assert_called_with(0.1)
 
-    @mock.patch("SumpOverflowAlert.App.time")
+    @patch("SumpOverflowAlert.App.time")
     def test_should_alert_after_previous_all_clear(self, mock_time):
         def get_distance_stub():
             self.app.shouldContinue = self.shouldContinue()
