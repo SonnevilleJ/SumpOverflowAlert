@@ -5,6 +5,7 @@ sys.path.append('./')
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+import SumpOverflowAlert
 from SumpOverflowAlert import config
 from SumpOverflowAlert.App import App
 
@@ -40,12 +41,11 @@ class TestApp(TestCase):
         self.assertEqual(0, self.mock_time.sleep.call_count % 200)
 
     def test_default_constructor_values(self):
-        self.app = App()
+        app = App()
 
-        self.assertEqual(self.app.notifier.username, config.gmail['username'])
-        self.assertEqual(self.app.notifier.password, config.gmail['password'])
-        # self.assertTrue(isinstance(self.app.rangeSensor, RangeSensor.RangeSensor))
-        # self.assertTrue(isinstance(self.app.sleeper, Sleeper))
+        self.assertEqual(app.notifier.username, config.gmail['username'])
+        self.assertEqual(app.notifier.password, config.gmail['password'])
+        self.assertIsInstance(app.rangeSensor, SumpOverflowAlert.Sensor.RangeSensor.RangeSensor)
 
     def test_creates_range_sensor(self):
         self.assertIsNotNone(self.app.rangeSensor)
