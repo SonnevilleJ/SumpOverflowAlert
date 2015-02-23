@@ -24,7 +24,9 @@ class TestApp(TestCase):
         self.loop_count = 0
         self.sensor_mock = Mock()
         self.notifier_mock = Mock()
-        self.app = App(self.sensor_mock, self.notifier_mock)
+        self.calibrator_mock = Mock()
+        self.calibrator_mock.get_trigger_distance.side_effect = self.get_trigger_distance_stub
+        self.app = App(self.sensor_mock, self.notifier_mock, self.calibrator_mock)
 
     def shouldContinue(self):
         return self.loop_count < self.max_loops
@@ -46,6 +48,7 @@ class TestApp(TestCase):
         self.assertEqual(app.notifier.username, config.gmail['username'])
         self.assertEqual(app.notifier.password, config.gmail['password'])
         self.assertIsInstance(app.rangeSensor, SumpOverflowAlert.Sensor.RangeSensor.RangeSensor)
+        self.assertIsInstance(app.calibrator, SumpOverflowAlert.Calibration.Calibrator.Calibrator)
 
     def test_creates_range_sensor(self):
         self.assertIsNotNone(self.app.rangeSensor)
@@ -59,10 +62,13 @@ class TestApp(TestCase):
 
         self.mock_time = mock_time
         self.sensor_mock.get_distance.side_effect = get_distance_stub
+        self.calibrator_mock.trigger_distance = config.trigger_distance
 
         self.app.run()
 
         mock_time.sleep.assert_called_with(0.1)
+        self.calibrator_mock.record_observation.assert_called_with(self.current_distance)
+        self.calibrator_mock.get_trigger_distance.assert_called_with()
 
     @patch("SumpOverflowAlert.App.time")
     def test_should_alert_after_previous_all_clear(self, mock_time):
@@ -84,3 +90,7 @@ class TestApp(TestCase):
 
         self.assertGreaterEqual(self.notifier_mock.send_notification.call_count, 2)
         self.assertGreaterEqual(self.notifier_mock.send_all_clear.call_count, 2)
+        self.calibrator_mock.get_trigger_distance.assert_called_with()
+
+    def get_trigger_distance_stub(self):
+        return config.trigger_distance
