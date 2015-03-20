@@ -30,7 +30,7 @@ class App(object):
             loop_counter += 1
             if distance < self.calibrator.get_trigger_distance():
                 sleep_timer = 0.01
-                if loop_counter * sleep_timer == config.alert_after:
+                if loop_counter * sleep_timer >= config.alert_after:
                     self.notifier.send_notification()
                     notification_sent = True
             else:
